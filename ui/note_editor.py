@@ -41,8 +41,14 @@ class NoteEditor(ttk.Frame):
         self.content_frame = ttk.Frame(self)
         self.content_frame.pack(fill=BOTH, expand=True, padx=5, pady=5)
 
+        # Use ttk.Text without style, apply manual styling
         self.content_text = ttk.Text(
-            self.content_frame, height=15, style="primary.Text"
+            self.content_frame,
+            height=15,
+            font=("Helvetica", 12),
+            bg="#343a40",  # Dark background (matches darkly theme)
+            fg="#f8f9fa",  # Light text
+            insertbackground="#f8f9fa",  # Light cursor
         )
         self.content_text.pack(side=LEFT, fill=BOTH, expand=True, padx=(0, 5))
         self.content_text.bind("<KeyRelease>", self.update_preview)

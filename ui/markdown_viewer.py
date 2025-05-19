@@ -4,15 +4,15 @@ from ttkbootstrap.constants import *
 
 class MarkdownViewer(ttk.Frame):
     def __init__(self, parent):
-        super().__init__(parent, style="dark.TFrame")
+        super().__init__(parent)
         self.text = ttk.Text(
             self,
             height=15,
             wrap=WORD,
             state="disabled",
             font=("Helvetica", 12),
-            bg="#343a40",  # Dark background (matches darkly theme)
-            fg="#f8f9fa",  # Light text
+            bg="#ffffff",
+            fg="#212529",
         )
         self.text.pack(fill=BOTH, expand=True, padx=5, pady=5)
 
@@ -24,7 +24,6 @@ class MarkdownViewer(ttk.Frame):
     def update_content(self, html):
         self.text.configure(state="normal")
         self.text.delete("1.0", END)
-        # Simple HTML parsing (supports <b>, <i>, <h1>)
         current_tag = None
         buffer = ""
         i = 0

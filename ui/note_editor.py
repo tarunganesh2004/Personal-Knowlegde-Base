@@ -6,22 +6,28 @@ from utils.markdown_utils import markdown_to_html
 
 class NoteEditor(ttk.Frame):
     def __init__(self, parent, db, on_save):
-        super().__init__(parent, style="dark.TFrame")
+        super().__init__(parent, style="Main.TFrame")
         self.db = db
         self.on_save = on_save
         self.current_note_id = None
 
+        # Form frame
+        self.form_frame = ttk.LabelFrame(
+            self, text="Note Details", style="Card.TLabelframe"
+        )
+        self.form_frame.pack(fill=X, padx=5, pady=5)
+
         # Title
         self.title_var = ttk.StringVar()
         self.title_entry = ttk.Entry(
-            self, textvariable=self.title_var, style="primary.Entry"
+            self.form_frame, textvariable=self.title_var, style="primary.Entry"
         )
         self.title_entry.pack(fill=X, padx=5, pady=5)
 
         # Tags
         self.tags_var = ttk.StringVar()
         self.tags_entry = ttk.Entry(
-            self, textvariable=self.tags_var, style="primary.Entry"
+            self.form_frame, textvariable=self.tags_var, style="primary.Entry"
         )
         self.tags_entry.pack(fill=X, padx=5, pady=5)
         self.tags_entry.insert(0, "comma,separated,tags")
@@ -29,7 +35,7 @@ class NoteEditor(ttk.Frame):
         # Category
         self.category_var = ttk.StringVar()
         self.category_combo = ttk.Combobox(
-            self,
+            self.form_frame,
             textvariable=self.category_var,
             values=["General", "Work", "Personal", "Study"],
             style="primary.TCombobox",
@@ -38,23 +44,36 @@ class NoteEditor(ttk.Frame):
         self.category_combo.set("General")
 
         # Content and preview
-        self.content_frame = ttk.Frame(self)
+        self.content_frame = ttk.PanedWindow(
+            self, orient=HORIZONTAL, style="Main.Panedwindow"
+        )
         self.content_frame.pack(fill=BOTH, expand=True, padx=5, pady=5)
 
-        # Use ttk.Text without style, apply manual styling
+        # Editor
+        self.editor_pane = ttk.Frame(self.content_frame)
+        self.content_frame.add(self.editor_pane, weight=1)
+        self.content_label = ttk.Label(
+            self.editor_pane, text="Content (Markdown)", style="Main.Label"
+        )
+        self.content_label.pack(anchor=W, padx=5, pady=2)
         self.content_text = ttk.Text(
-            self.content_frame,
+            self.editor_pane,
             height=15,
             font=("Helvetica", 12),
-            bg="#343a40",  # Dark background (matches darkly theme)
-            fg="#f8f9fa",  # Light text
-            insertbackground="#f8f9fa",  # Light cursor
+            bg="#ffffff",
+            fg="#212529",
+            insertbackground="#212529",
         )
-        self.content_text.pack(side=LEFT, fill=BOTH, expand=True, padx=(0, 5))
+        self.content_text.pack(fill=BOTH, expand=True, padx=5, pady=(0, 5))
         self.content_text.bind("<KeyRelease>", self.update_preview)
 
-        self.preview = MarkdownViewer(self.content_frame)
-        self.preview.pack(side=RIGHT, fill=BOTH, expand=True)
+        # Preview
+        self.preview_pane = ttk.LabelFrame(
+            self.content_frame, text="Preview", style="Card.TLabelframe"
+        )
+        self.content_frame.add(self.preview_pane, weight=1)
+        self.preview = MarkdownViewer(self.preview_pane)
+        self.preview.pack(fill=BOTH, expand=True, padx=5, pady=5)
 
         # Buttons
         self.button_frame = ttk.Frame(self)
@@ -65,21 +84,21 @@ class NoteEditor(ttk.Frame):
             style="primary.TButton",
             command=self.save_note,
         )
-        self.save_button.pack(side=LEFT, padx=5)
+        self.save_button.pack(side=RIGHT, padx=5)
         self.delete_button = ttk.Button(
             self.button_frame,
             text="Delete",
             style="danger.TButton",
             command=self.delete_note,
         )
-        self.delete_button.pack(side=LEFT, padx=5)
+        self.delete_button.pack(side=RIGHT, padx=5)
         self.clear_button = ttk.Button(
             self.button_frame,
             text="Clear",
             style="secondary.TButton",
             command=self.clear_form,
         )
-        self.clear_button.pack(side=LEFT, padx=5)
+        self.clear_button.pack(side=RIGHT, padx=5)
 
     def load_note(self, note_id):
         note = self.db.get_note_by_id(note_id)
